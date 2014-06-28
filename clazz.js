@@ -28,8 +28,8 @@ var Clazz = function() {
         }
     }
     return {
-        //simplest copying of fields.
-        //Use it if no need for own properties check or other complex stuff, overwise use things like jQuery.extend
+        //simple copying of fields from source to target. Returns source
+        //Use it if no need for own properties check or other complex stuff, otherwise use things like jQuery.extend
         extend: function(source, target) {
             for (var k in target) {
                 source[k] = target[k];
@@ -37,10 +37,10 @@ var Clazz = function() {
             return source;
         },
         //base, clazz: constructors of classes, whether function or object.
-        //(object is used if no need for construction code and private fields)
+        //(object is used if no need for private fields)
+        //extendFunc - function for merging prototypes. optional. Used if simplest extend isn't enough
         //Assumption: if base and class are functions they return nothing (they use .extend function for defining fields)
         //Assumption: base constructor supports calling without parameters (prototype construction mode)
-        //extendFunc - function for merging prototypes, optional. Used if simplest extend isn't enough
         inherit: function(base, clazz, extendFunc) {
             extendFunc = extendFunc || Clazz.extend;
             var constructor;
