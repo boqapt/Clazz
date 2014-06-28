@@ -1,0 +1,32 @@
+{
+  "name": "Clazz",
+  "description": "Javascript inheritance library with support of nested private scopes",
+  "version": "0.0.1",
+  "author": {
+    "name": "Boris Kaganov",
+    "email": "olog@gmx.com"
+  },
+  "main": "./clazz",
+  "keywords": [
+    "inheritance",
+    "private"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/boqapt/Clazz"
+  },
+  "scripts": {
+    "test": "tap test.js"
+  },
+  "devDependencies": {
+    "tap": "~0.4.0"
+  },
+  "license": "MIT",
+  "readme": "Inheritance utility class. Now supports just single inheritance",
+  "readmeFilename": "README.md",
+  "bugs": {
+    "url": "https://github.com/boqapt/Clazz/issues"
+  },
+  "_id": "Clazz@0.0.1",
+  "_from": "Clazz@"
+}
