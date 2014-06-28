@@ -5,20 +5,29 @@ This library addresses the problem of Javascript not being able at the same time
 - inherit from prototype of base class
 - give all methods of mentioned prototype access to private variables of base class (private variables are defined in natural JS way as local variables in a constructor)
 
-== API ==
+API
+---
 
     Clazz.inherit(base, clazz, extendFunc)
-    //(object is used if no need for private fields)
-    //base, clazz: constructors of classes, whether function or object.
-    //extendFunc - function for merging prototypes. optional. Used if simplest extend isn't enough
-    //Assumption: if base and class are functions they return nothing (they use .extend function for defining fields)
-    //Assumption: base constructor supports calling without parameters (prototype construction mode)
+
+(object is used if no need for private fields)
+
+base, clazz: constructors of classes, whether function or literal object.
+
+extendFunc - function for merging prototypes. optional. Used if simplest extend isn't enough
+
+Assumption: if base and class are functions they return nothing (they use .extend function for defining fields)
+
+Assumption: base supports calling without parameters (prototype construction mode)
 
     Clazz.extend(source, target)
-    //simple copying of fields from source to target. Returns source
-    //Use it if no need for own properties check or other complex stuff, otherwise use things like jQuery.extend
 
-== Example ==
+simple copying of fields from source to target. Returns source
+
+Use it if no need for own properties check or other complex stuff, otherwise use things like jQuery.extend
+
+Example
+-------
 
     var Parent = function(constructorParam) {
         if (!arguments.length) {
