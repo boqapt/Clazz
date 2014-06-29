@@ -67,6 +67,7 @@ Use it if no need for own properties check or other complex stuff, otherwise use
     };
     
 In order to have protected scope any descendant of SomeClass can create an object and pass it as constructor parameter 'protected'. So only SomeClass and its descendants will have access to protected.someProtectedVariable.
+
 Class methods defined outside a constructor are also supported but they can't have access to private members and fields.
 
     Someclass.prototype.someOtherMethod = function(param) { this.fieldOfClass = param + 5; }
