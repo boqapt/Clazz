@@ -1,73 +1,135 @@
 //Inheritance utility class. Now supports just single inheritance
-var Clazz = function() {
+var Clazz = function () {
     function constructionMethods(extendFunc) {
         return {
-            baseCallDirect: function(baseClass, args) {
+            //we need __baseClasses, construct, constructApply just to not be obliged specifying base class name in 2 places
+            //(inherit call and constructor call). We can still call base constructor directly with constructDirect
+            constructDirect:function (baseClass, args) {
                 //create private scope of parent class and connect it to constructed object
-                extendFunc(this, typeof(baseClass) !== 'function' ? baseClass : baseClass.apply(this, args));
-                this.base = extendFunc({}, this); //create parent fields table and save link to it
+                extendFunc(this, baseClass.apply(this, args));
+                this.superclass = extendFunc({}, this); //create parent fields table and save link to it
             },
-
-            //we need __baseClasses, baseCall, baseApply just to not be obliged specifying base class name in 2 places
-            //(inherit call and constructor call). We can still call base constructor directly with baseCallDirect
 
             //Assumption: caller didn't modify 'thiz' (for example, setting fields) before call (needed for parent fields table)
             //Has variable number of arguments, all passed to base constructor
-            baseCall: function() {
+            construct:function () {
                 var baseClassesBackup = this.__baseClasses;
-                this.__baseClasses = this.__baseClasses.slice();
-                //remove base class from __baseClasses. make it equal to own chain of inheritance of base class
-                var baseClass = this.__baseClasses.pop();
-                this.baseCallDirect(baseClass, arguments);
-                this.__baseClasses = baseClassesBackup;
+                if (baseClassesBackup.length) {
+                    this.__baseClasses = this.__baseClasses.slice();
+                    //remove base class from __baseClasses. make it equal to own chain of inheritance of base class
+                    var baseClass = this.__baseClasses.pop();
+                    this.constructDirect(baseClass, arguments);
+                    this.__baseClasses = baseClassesBackup;
+                }
             },
 
-            baseApply: function(args) {
-                this.baseCall.apply(this, args);
+            constructApply:function (args) {
+                this.construct.apply(this, args);
             }
         }
     }
-    return {
-        //simple copying of fields from source to target. Returns source
-        //Use it if no need for own properties check or other complex stuff, otherwise use things like jQuery.extend
-        extend: function(source, target) {
-            for (var k in target) {
-                source[k] = target[k];
+
+    function inherit(base, options, clazz) {
+        var extendFunc = options.extendFunc || Clazz.extend;
+
+        var constructor;
+        if (typeof(clazz) !== 'function') {
+            if (typeof(base) !== 'function') {
+                clazz = extendFunc(clazz, base);
+                clazz.superclass = base;
+                return clazz;
             }
-            return source;
-        },
-        //base, clazz: constructors of classes, whether function or object.
-        //(object is used if no need for private fields)
-        //extendFunc - function for merging prototypes. optional. Used if simplest extend isn't enough
-        //Assumption: if base and class are functions they return nothing (they use .extend function for defining fields)
-        //Assumption: base constructor supports calling without parameters (prototype construction mode)
-        inherit: function(base, clazz, extendFunc) {
-            extendFunc = extendFunc || Clazz.extend;
-            var constructor;
-            if (typeof(clazz) !== 'function') {
-                constructor = function() {
-                    this.baseApply(arguments);
+            constructor = function () {
+                this.constructApply(arguments);
+                extendFunc(this, clazz);
+            };
+        } else {
+            if (options.autoConstruct) {
+                constructor = function () {
+                    this.constructApply(arguments);
+                    clazz.apply(this, arguments);
                 };
-                constructor.prototype = clazz;
             } else {
                 constructor = clazz;
-                constructor.prototype = {};
             }
-            var baseProto = base;
-            if (typeof(base) !== 'function') {
-                baseProto = function() {};
-                baseProto.prototype = base;
+            constructor.prototype = clazz.prototype;
+        }
+
+        var baseProto;
+        var baseClasses; //chain of base classes (for tracking currently constructed ancestor)
+        if (typeof(base) !== 'function') {
+            baseClasses = [];
+            baseProto = base;
+        } else {
+            baseClasses = base.prototype.__baseClasses || [];
+            baseClasses.push(base);
+            baseProto = base.prototype;
+        }
+        baseProto = extendFunc({}, baseProto);
+        constructor.prototype = extendFunc(baseProto, constructor.prototype);
+        constructor.prototype.__baseClasses = baseClasses;
+        constructor.prototype.constructor = constructor;
+        Clazz.extend(constructor.prototype, constructionMethods(extendFunc));
+
+        return constructor;
+    }
+
+    return {
+        //simple copying of fields from source to target. Returns target
+        //Use it if no need for own properties check or other complex stuff, otherwise use things like jQuery.extend
+        extend:function (target, source) {
+            for (var k in source) {
+                target[k] = source[k];
             }
-            Clazz.extend(constructor.prototype, new baseProto());
-            constructor.prototype.constructor = constructor;
-            constructor.prototype.__baseClasses = constructor.prototype.__baseClasses || []; //chain of base classes
-            constructor.prototype.__baseClasses.push(baseProto); // (for tracking currently constructed ancestor)
-            Clazz.extend(constructor.prototype,  constructionMethods(extendFunc));
-            return constructor;
+            return target;
+        },
+        //creates and returns class having functionality of 'clazz' but inheriting from 'base'.
+        //
+        //base (input parameter), clazz (input/output parameter): classes, whether function or literal object.
+        //
+        //Prototype of clazz is modified (for inheriting) but only if clazz is a function and options.autoConstruct is
+        //not specified.
+        //
+        //- If one of base and clazz is function then returned class is function used for creation of
+        // objects by 'new' operator.
+        // Created objects have:
+        // -- field .superclass containing virtual table of fields for ancestor
+        // -- method construct(arg1, arg2, ...) - call base constructor with given arguments
+        // -- method constructApply(args) - same as construct, bug arguments are given as array
+        // -- method constructDirect(base, args) - call given base constructor with given array of arguments
+        //
+        //- If both base and clazz are literal objects result is literal object too (modified clazz object)
+        // with superclass field equal to base
+        //
+        //options - optional object, can be omitted. Fields:
+        //
+        //- extendFunc - Used for merging objects. Specified if simple Clazz.extend isn't enough
+        //
+        //- autoConstruct - If specified, constructor of base class is called automatically on creation of object.
+        //
+        //Assumption: if not autoConstruct then constructor of clazz should call constructor of 'base' explicitly
+        //(if both constructors exist)
+        inherit:function (base, options, clazz) {
+            if (arguments.length != 3) {
+                clazz = arguments[1];
+                options = {};
+            }
+            return inherit(base, options || {}, clazz);
+        },
+        //creates and returns class same as 'clazz' but inheriting from 'base'. constructor of base class is called
+        //automatically on creation of object.
+        //(Shortcut for .inherit with autoConstruct option.)
+        inheritConstruct:function (base, options, clazz) {
+            if (arguments.length != 3) {
+                clazz = arguments[1];
+                options = {};
+            }
+            options.autoConstruct = true;
+            return inherit(base, options, clazz);
         }
     }
 }();
 
-if (module) {
+if (typeof module !== 'undefined') {
     module.exports = Clazz.Clazz = Clazz;
 }
