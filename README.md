@@ -28,9 +28,9 @@ objects by 'new' operator.
 objects by 'new' operator. 
 Created objects have: 
   - field .superclass containing virtual table of fields for ancestor
-  - method construct(arg1, arg2, ...) - call base constructor with given arguments
-  - method constructApply(args) - same as construct, bug arguments are given as array
-  - method constructDirect(base, args) - call given base constructor with given array of arguments
+  - method superConstruct(arg1, arg2, ...) - call base constructor with given arguments
+  - method superConstructApply(args) - same as construct, bug arguments are given as array
+  - method superConstructDirect(base, args) - call given base constructor with given array of arguments
 
 - If both base and clazz are literal objects result is literal object too (modified clazz object)
 with superclass field equal to base
@@ -97,7 +97,7 @@ Also literal objects are supported by library. But they can't have private and p
     };
 
     var Child = Clazz.inherit(Parent, function() {
-        this.constructApply(arguments);
+        this.superConstructApply(arguments);
         Clazz.extend(this,{
             setPrivateVar: function(newPrivateVar){
                 this.superclass.setPrivateVar.call(this,newPrivateVar+1);
@@ -114,7 +114,7 @@ Explanation:
 
 - Clazz.inherit is used to inherit Child from Parent. Child redefines setPrivateVar to control value assigned to privateVar.
 
-- Child calls this.constructApply to call constructor of Parent. As it passes its own list of arguments, this call can be replaced with option.autoConstruct
+- Child calls this.superConstructApply to call constructor of Parent. As it passes its own list of arguments, this call can be replaced with option.autoConstruct
 
 
     var Child = Clazz.inherit(Parent, {autoConstruct: true}, {
