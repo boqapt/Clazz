@@ -58,7 +58,7 @@ Use it if no need for own properties check or other complex stuff, otherwise use
 
 
 # Example 1. Definition of class
--------
+
 
     var SomeClass = function(protected, parameterOfConstructor) {
         var privateVariable = parameterOfConstructor;
@@ -81,8 +81,8 @@ Use it if no need for own properties check or other complex stuff, otherwise use
     }
 
 
-# Example 3. Using library to inherit class
--------
+# Example 2. Using library to inherit class
+
 
     var Parent = function(constructorParam) {
         var privateVar = 0;
