@@ -116,6 +116,9 @@ Explanation:
 
 - Child calls this.superConstructApply to call constructor of Parent. As it passes its own list of arguments, this call can be replaced with option.autoConstruct
 
+New Child:
+
+
 
     var Child = Clazz.inherit(Parent, {autoConstruct: true}, {
             setPrivateVar: function(newPrivateVar){
