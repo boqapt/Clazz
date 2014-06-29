@@ -24,16 +24,16 @@ test('inherit from function constructor', function (t) {
     };
 
     var n = Clazz.inherit(r, function () {
-        this.constructApply(arguments);
+        this.superConstructApply(arguments);
         Clazz.extend(this, {})
     });
     var j = Clazz.inherit(r, function () {
-        this.constructApply(arguments);
+        this.superConstructApply(arguments);
         Clazz.extend(this, {})
     });
 
     var u = Clazz.inherit(n, function () {
-        this.constructApply(arguments);
+        this.superConstructApply(arguments);
         Clazz.extend(this, {
             setP:function (i) {
                 this.superclass.setP.call(this, i + 1);
@@ -102,7 +102,7 @@ test('inherit from literal object constructor', function (t) {
     var j = Clazz.inherit(r, {});
 
     var u = Clazz.inherit(n, function () {
-        this.constructApply(arguments);
+        this.superConstructApply(arguments);
         Clazz.extend(this, {
             setP:function (i) {
                 this.superclass.setP.call(this, i + 1);

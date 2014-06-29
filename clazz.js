@@ -2,9 +2,10 @@
 var Clazz = function () {
     function constructionMethods(extendFunc) {
         return {
-            //we need __baseClasses, construct, constructApply just to not be obliged specifying base class name in 2 places
-            //(inherit call and constructor call). We can still call base constructor directly with constructDirect
-            constructDirect:function (baseClass, args) {
+            //we need __baseClasses, superConstruct, superConstructApply just to not be obliged specifying base class
+            // name in 2 places (inherit call and constructor call). We can still call base constructor directly with
+            // superConstructDirect
+            superConstructDirect:function (baseClass, args) {
                 //create private scope of parent class and connect it to constructed object
                 extendFunc(this, baseClass.apply(this, args));
                 this.superclass = extendFunc({}, this); //create parent fields table and save link to it
@@ -12,19 +13,19 @@ var Clazz = function () {
 
             //Assumption: caller didn't modify 'thiz' (for example, setting fields) before call (needed for parent fields table)
             //Has variable number of arguments, all passed to base constructor
-            construct:function () {
+            superConstruct:function () {
                 var baseClassesBackup = this.__baseClasses;
                 if (baseClassesBackup.length) {
                     this.__baseClasses = this.__baseClasses.slice();
                     //remove base class from __baseClasses. make it equal to own chain of inheritance of base class
                     var baseClass = this.__baseClasses.pop();
-                    this.constructDirect(baseClass, arguments);
+                    this.superConstructDirect(baseClass, arguments);
                     this.__baseClasses = baseClassesBackup;
                 }
             },
 
-            constructApply:function (args) {
-                this.construct.apply(this, args);
+            superConstructApply:function (args) {
+                this.superConstruct.apply(this, args);
             }
         }
     }
@@ -33,20 +34,21 @@ var Clazz = function () {
         var extendFunc = options.extendFunc || Clazz.extend;
 
         var constructor;
+        var baseIsLiteral = typeof(base) !== 'function';
         if (typeof(clazz) !== 'function') {
-            if (typeof(base) !== 'function') {
+            if (baseIsLiteral) {
                 clazz = extendFunc(clazz, base);
                 clazz.superclass = base;
                 return clazz;
             }
             constructor = function () {
-                this.constructApply(arguments);
+                this.superConstructApply(arguments);
                 extendFunc(this, clazz);
             };
         } else {
             if (options.autoConstruct) {
                 constructor = function () {
-                    this.constructApply(arguments);
+                    this.superConstructApply(arguments);
                     clazz.apply(this, arguments);
                 };
             } else {
@@ -57,7 +59,7 @@ var Clazz = function () {
 
         var baseProto;
         var baseClasses; //chain of base classes (for tracking currently constructed ancestor)
-        if (typeof(base) !== 'function') {
+        if (baseIsLiteral) {
             baseClasses = [];
             baseProto = base;
         } else {
@@ -66,6 +68,7 @@ var Clazz = function () {
             baseProto = base.prototype;
         }
         baseProto = extendFunc({}, baseProto);
+        if (baseIsLiteral) constructor.prototype.superclass = baseProto;
         constructor.prototype = extendFunc(baseProto, constructor.prototype);
         constructor.prototype.__baseClasses = baseClasses;
         constructor.prototype.constructor = constructor;
@@ -94,9 +97,9 @@ var Clazz = function () {
         // objects by 'new' operator.
         // Created objects have:
         // -- field .superclass containing virtual table of fields for ancestor
-        // -- method construct(arg1, arg2, ...) - call base constructor with given arguments
-        // -- method constructApply(args) - same as construct, bug arguments are given as array
-        // -- method constructDirect(base, args) - call given base constructor with given array of arguments
+        // -- method superConstruct(arg1, arg2, ...) - call base constructor with given arguments
+        // -- method superConstructApply(args) - same as superConstruct, bug arguments are given as array
+        // -- method superConstructDirect(base, args) - call given base constructor with given array of arguments
         //
         //- If both base and clazz are literal objects result is literal object too (modified clazz object)
         // with superclass field equal to base
