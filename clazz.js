@@ -14,9 +14,9 @@ var Clazz = function () {
             //Assumption: caller didn't modify 'thiz' (for example, setting fields) before call (needed for parent fields table)
             //Has variable number of arguments, all passed to base constructor
             superConstruct:function () {
-                if (this.__baseClasses.length) {
-                    //remove base class from __baseClasses. make it equal to own chain of inheritance of base class
-                    var baseClass = this.__baseClasses.pop();
+                //remove base class from __baseClasses. make it equal to own chain of inheritance of base class
+                var baseClass = this.__baseClasses.pop();
+                if (baseClass) {
                     this.superConstructDirect(baseClass, arguments);
                     this.__baseClasses.push(baseClass); //rollback __baseClasses
                 }
