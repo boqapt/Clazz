@@ -7,8 +7,9 @@ This lightweight OOP library provides some simple OOP features:
 - use of fast prototype inheritance when it's possible
 - use of functional inheritance when prototype inheritance is not enough (to preserve parent's private members).
 
-Some other OOP libraries tend to implement all OOP features, like protected fields and interfaces. For that they use complex syntax, for example, a separate scope for variables with specific visibility or defining names of classes or fields inside strings. It complicates IDE syntax highlighting and debugging.
-But this library has a goal to include features natural for JS only, use syntax and keywords of JS intended for OOP at maximum and have small footprint (see [example 1](#example-1-definition-of-class))
+Some other OOP libraries tend to implement all OOP features, like protected fields and interfaces. For that they use complex syntax, for example, a separate scope for variables with specific visibility or defining names of classes or fields inside strings. It complicates debugging and confuses IDE syntax highlighting.
+
+But this library has a goal to include only features natural for JS, use syntax and keywords of JS intended for OOP at maximum and have small footprint (see [example 1](#example-1-definition-of-class))
 
 
 API
