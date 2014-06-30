@@ -120,7 +120,9 @@ Clazz.inherit is used to inherit Child from Parent. Child redefines setPrivateVa
 
 Child overrides Parent's method setPrivateVar and inside override calls method of Parent using this.superclass. So it has an access a value of private variable of Parent.
 
-Child calls this.superConstructApply to call constructor of Parent. As it passes its own list of arguments, this call can be replaced with option.autoConstruct
+Child calls this.superConstructApply to call constructor of Parent. Its important that no fields of an object would be defined or set before constructor call. Its the natural order of inheriting from an object: defining parent's fields first and applying child's fields
+
+As Child passes to constructor its own list of arguments, this call can be replaced with option.autoConstruct
 
 
 
