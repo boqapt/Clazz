@@ -40,7 +40,7 @@ var Clazz = function () {
 
     function inherit(base, options, clazz) {
         var extendFunc = options.extendFunc || Clazz.extend;
-
+        //prepare class constructor
         var constructor;
         var baseIsLiteralObj = typeof(base) !== 'function';
         if (typeof(clazz) !== 'function') {
@@ -54,7 +54,7 @@ var Clazz = function () {
             constructor = options.autoConstruct ? autoConstructor(clazz) : clazz;
             constructor.prototype = clazz.prototype;
         }
-
+        //prepare chain of inheritance and parent's prototype
         var baseProto;
         var baseClasses; //chain of base classes (for tracking currently constructed ancestor)
         if (baseIsLiteralObj) {
@@ -66,8 +66,11 @@ var Clazz = function () {
             baseProto = base.prototype;
         }
         baseProto = extendFunc({}, baseProto);
-        if (baseIsLiteralObj) constructor.prototype.superclass = baseProto;
+        //prepare prototype of new class
         constructor.prototype = extendFunc(baseProto, constructor.prototype);
+        if (baseIsLiteralObj) {
+            constructor.prototype.superclass = baseProto;
+        }
         constructor.prototype.__baseClasses = baseClasses;
         constructor.prototype.constructor = constructor;
         Clazz.extend(constructor.prototype, constructionMethods(extendFunc));
