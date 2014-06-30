@@ -7,7 +7,8 @@ This lightweight OOP library provides some simple OOP features:
 - use of fast prototype inheritance when it's possible
 - use of functional inheritance when prototype inheritance is not enough (to preserve parent's private members).
 
-Some other OOP libraries tend to implement all OOP features, like protected fields and interfaces. For that they use complex syntax, for example, a separate scope for variables with specific visibility or defining names of classes or fields inside strings. But this library has a goal to include features natural for JS only, use syntax and keywords of JS intended for OOP at maximum and have small footprint (see [example 1](#example-1-definition-of-class))
+Some other OOP libraries tend to implement all OOP features, like protected fields and interfaces. For that they use complex syntax, for example, a separate scope for variables with specific visibility or defining names of classes or fields inside strings. It complicates IDE syntax highlighting and debugging.
+But this library has a goal to include features natural for JS only, use syntax and keywords of JS intended for OOP at maximum and have small footprint (see [example 1](#example-1-definition-of-class))
 
 
 API
@@ -98,9 +99,11 @@ Also literal objects are supported by library. But they can't have private and p
 
     var Child = Clazz.inherit(Parent, function() {
         this.superConstructApply(arguments);
+        
+        var anotherPrivateVar = 1;
         Clazz.extend(this,{
             setPrivateVar: function(newPrivateVar){
-                this.superclass.setPrivateVar.call(this,newPrivateVar+1);
+                this.superclass.setPrivateVar.call(this,newPrivateVar+anotherPrivateVar);
             }
         })
     });
@@ -112,18 +115,45 @@ Also literal objects are supported by library. But they can't have private and p
 
 Explanation:
 
-- Clazz.inherit is used to inherit Child from Parent. Child redefines setPrivateVar to control value assigned to privateVar.
+Clazz.inherit is used to inherit Child from Parent. Child redefines setPrivateVar to control value assigned to privateVar.
 
-- Child calls this.superConstructApply to call constructor of Parent. As it passes its own list of arguments, this call can be replaced with option.autoConstruct
+Child overrides Parent's method setPrivateVar and inside override calls method of Parent using this.superclass. So it has an access a value of private variable of Parent.
 
-New Child:
+Child calls this.superConstructApply to call constructor of Parent. As it passes its own list of arguments, this call can be replaced with option.autoConstruct
 
 
 
     var Child = Clazz.inherit(Parent, {autoConstruct: true}, {
+        var anotherPrivateVar = 1;
+        Clazz.extend(this,{
             setPrivateVar: function(newPrivateVar){
+                this.superclass.setPrivateVar.call(this,newPrivateVar+anotherPrivateVar);
+            }
+        })
+    });
+    
+
+There is a shortcut for this option. The following code does the same.
+
+
+    var Child = Clazz.inheritConstruct(Parent, {
+        var anotherPrivateVar = 1;
+        Clazz.extend(this,{
+            setPrivateVar: function(newPrivateVar){
+                this.superclass.setPrivateVar.call(this,newPrivateVar+anotherPrivateVar);
+            }
+        })
+    });
+
+
+If we remove Child's private field anotherPrivateVar, we can make use literal object.
+
+
+    var Child = Clazz.inherit(Parent, {
+        setPrivateVar: function(newPrivateVar){
                 this.superclass.setPrivateVar.call(this,newPrivateVar+1);
             }
     });
-    
-- Child overrides Parent's method setPrivateVar and inside override calls method of Parent using this.superclass. So it has an access a value of private variable of Parent.
+
+
+Though inherit is used here and not inheritConstruct, parent's constructor is anyway called if we use literal objects.
