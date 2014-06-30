@@ -16,9 +16,6 @@ test('inherit from function constructor', function (t) {
                 p = i
             }
         });
-        if (!arguments.length) {
-            return; //prototype creation mode
-        }
         var p = 0;
         this.zz = 0;
     };
@@ -91,9 +88,6 @@ test('inherit from literal object constructor', function (t) {
                 p = i
             }
         });
-        if (!arguments.length) {
-            return; //prototype creation mode
-        }
         var p = 0;
         this.zz = 0;
     };
