@@ -11,7 +11,7 @@ var Clazz = function () {
                 this.superclass = extendFunc({}, this); //create parent fields table and save link to it
             },
 
-            //Assumption: caller didn't modify 'thiz' (for example, setting fields) before call (needed for parent fields table)
+            //Assumption: caller didn't modify 'this' (for example, setting fields) before call (needed for parent fields table)
             //Has variable number of arguments, all passed to base constructor
             superConstruct:function () {
                 //remove base class from __baseClasses. make it equal to own chain of inheritance of base class
@@ -27,37 +27,37 @@ var Clazz = function () {
             }
         }
     }
+    function autoConstructor(clazz, extendFunc) {
+        return function () {
+            this.superConstructApply(arguments);
+            if (extendFunc) {
+                extendFunc(this, clazz);
+            } else {
+                clazz.apply(this, arguments);
+            }
+        }
+    }
 
     function inherit(base, options, clazz) {
         var extendFunc = options.extendFunc || Clazz.extend;
 
         var constructor;
-        var baseIsLiteral = typeof(base) !== 'function';
+        var baseIsLiteralObj = typeof(base) !== 'function';
         if (typeof(clazz) !== 'function') {
-            if (baseIsLiteral) {
+            if (baseIsLiteralObj) {
                 clazz = extendFunc(clazz, base);
                 clazz.superclass = base;
                 return clazz;
             }
-            constructor = function () {
-                this.superConstructApply(arguments);
-                extendFunc(this, clazz);
-            };
+            constructor = autoConstructor(clazz, extendFunc);
         } else {
-            if (options.autoConstruct) {
-                constructor = function () {
-                    this.superConstructApply(arguments);
-                    clazz.apply(this, arguments);
-                };
-            } else {
-                constructor = clazz;
-            }
+            constructor = options.autoConstruct ? autoConstructor(clazz) : clazz;
             constructor.prototype = clazz.prototype;
         }
 
         var baseProto;
         var baseClasses; //chain of base classes (for tracking currently constructed ancestor)
-        if (baseIsLiteral) {
+        if (baseIsLiteralObj) {
             baseClasses = [];
             baseProto = base;
         } else {
@@ -66,7 +66,7 @@ var Clazz = function () {
             baseProto = base.prototype;
         }
         baseProto = extendFunc({}, baseProto);
-        if (baseIsLiteral) constructor.prototype.superclass = baseProto;
+        if (baseIsLiteralObj) constructor.prototype.superclass = baseProto;
         constructor.prototype = extendFunc(baseProto, constructor.prototype);
         constructor.prototype.__baseClasses = baseClasses;
         constructor.prototype.constructor = constructor;
