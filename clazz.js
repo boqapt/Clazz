@@ -2,7 +2,7 @@
 var Clazz = function () {
     function proxy(f, context) {
         return function () {
-            f.apply(context, arguments);
+            return f.apply(context, arguments);
         }
     }
 
