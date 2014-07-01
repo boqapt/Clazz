@@ -73,7 +73,7 @@ Class methods defined outside a constructor using .prototype are also supported 
 
     SomeClass.prototype.someOtherMethod = function(param) { this.fieldOfClass = param + 5; }
 
-Also literal objects are also supported by library. But they can't have private and protected fields and members.
+Literal objects are also supported by library. But they can't have private fields and members.
 
     var OtherClass = {
         fieldOfClass: 0,
