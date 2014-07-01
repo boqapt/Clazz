@@ -80,7 +80,7 @@ Also literal objects are also supported by library. But they can't have private 
         methodOfClass = function () { return this.fieldOfClass + 5; }
     }
 
-As for me, I use literal objects if features they provide are enough, otherwise O prefer objects defined entirely inside a constructor function because they provide greatest encapsulation and OOP features.
+As for me, I use literal objects if features they provide are enough, otherwise I prefer objects defined entirely inside a constructor function because they provide greatest encapsulation and OOP features.
 
 # Example 2. Using library to inherit class
 
