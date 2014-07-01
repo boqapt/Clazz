@@ -1,12 +1,10 @@
-change superConstruct* to superclass.construct[.direct/.apply]
-
 write tests for:
 - result of inherit for 4 combinations of base/clazz being function/object
 - result of inherit for 8 combinations of base/clazz being function/object and next class in chain being function/object
 - presense of correct superclass
 - prototype of function base left unchanged
-- prototype of function clazz changed if not autoConstruct in cases of base function/object
-- constructor called if autoConstruct
+- prototype of function clazz changed if not implicitConstruct in cases of base function/object
+- constructor called if implicitConstruct
 - in chain of inheritance with length 4 .superclass always points to parent's table of methods
 - in chain of inheritance with length 4 superConstruct* is present for each link
 - check table of methods for: value overriden method in parent is parent's, for not overriden same as in child

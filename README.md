@@ -21,7 +21,7 @@ creates and returns class having functionality of 'clazz' but inheriting from 'b
 
 base (input parameter), clazz (input/output parameter): classes, whether function or literal object.
 
-Prototype of clazz is modified (for inheriting) but only if clazz is a function and options.autoConstruct is
+Prototype of clazz is modified (for inheriting) but only if clazz is a function and options.implicitConstruct is
 not specified.
 
 - If one of base and clazz is function then returned class is function used for creation of
@@ -39,9 +39,9 @@ options - optional object, can be omitted. Fields:
 
 - extendFunc - Used for merging objects. Specified if simple Clazz.extend isn't enough
 
-- autoConstruct - If specified, constructor of base class is called implicitly on creation of object.
+- implicitConstruct - If specified, constructor of base class is called implicitly on creation of object.
 
-Assumption: if not autoConstruct then constructor of clazz should call constructor of 'base' explicitly
+Assumption: if not implicitConstruct then constructor of clazz should call constructor of 'base' explicitly
 (if both constructors exist)
 
     Clazz.inheritConstruct(base, options, clazz) 
@@ -49,7 +49,7 @@ Assumption: if not autoConstruct then constructor of clazz should call construct
 creates and returns class same as 'clazz' but inheriting from 'base'. constructor of base class is called
 automatically on creation of object.
 
-(Shortcut for .inherit method with autoConstruct option set)
+(Shortcut for .inherit method with implicitConstruct option set)
 
     Clazz.extend(source, target)
 
@@ -121,11 +121,11 @@ Child overrides Parent's method setPrivateVar and inside override calls method o
 
 Child calls this.superConstructApply to call constructor of Parent. Its important that no fields of an object would be defined or set before constructor call. Its the natural order of inheriting from an object: defining parent's fields first and applying child's fields
 
-As Child passes to constructor its own list of arguments, this call can be replaced with option.autoConstruct
+As Child passes to constructor its own list of arguments, this call can be replaced with option.implicitConstruct
 
 
 
-    var Child = Clazz.inherit(Parent, {autoConstruct: true}, {
+    var Child = Clazz.inherit(Parent, {implicitConstruct: true}, {
         var anotherPrivateVar = 1;
         Clazz.extend(this,{
             setPrivateVar: function(newPrivateVar){

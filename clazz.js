@@ -41,7 +41,7 @@ var Clazz = function () {
         }
     }
 
-    function autoConstructor(clazz, extendFunc) {
+    function implicitConstructor(clazz, extendFunc) {
         return function () {
             this.superclass.apply(this, arguments);
             if (extendFunc) {
@@ -63,9 +63,9 @@ var Clazz = function () {
                 clazz.superclass = base;
                 return clazz;
             }
-            constructor = autoConstructor(clazz, extendFunc);
+            constructor = implicitConstructor(clazz, extendFunc);
         } else {
-            constructor = options.autoConstruct ? autoConstructor(clazz) : clazz;
+            constructor = options.implicitConstruct ? implicitConstructor(clazz) : clazz;
             constructor.prototype = clazz.prototype;
         }
 
@@ -99,7 +99,7 @@ var Clazz = function () {
         //
         //base (input parameter), clazz (input/output parameter): classes, whether function or literal object.
         //
-        //Prototype of clazz is modified (for inheriting) but only if clazz is a function and options.autoConstruct is
+        //Prototype of clazz is modified (for inheriting) but only if clazz is a function and options.implicitConstruct is
         //not specified.
         //
         //- If one of base and clazz is function then returned class is function used for creation of
@@ -117,9 +117,9 @@ var Clazz = function () {
         //
         //- extendFunc - Used for merging objects. Specified if simple Clazz.extend isn't enough
         //
-        //- autoConstruct - If specified, constructor of base class is called implicitly on creation of object.
+        //- implicitConstruct - If specified, constructor of base class is called implicitly on creation of object.
         //
-        // Assumption: if not autoConstruct then constructor of clazz should call constructor of 'base' explicitly
+        // Assumption: if not implicitConstruct then constructor of clazz should call constructor of 'base' explicitly
         // (if both constructors exist)
         inherit:function (base, options, clazz) {
             if (arguments.length != 3) {
@@ -130,13 +130,13 @@ var Clazz = function () {
         },
         //creates and returns class same as 'clazz' but inheriting from 'base'. constructor of base class is called
         //automatically on creation of object.
-        //(Shortcut for .inherit with autoConstruct option.)
+        //(Shortcut for .inherit with implicitConstruct option.)
         inheritConstruct:function (base, options, clazz) {
             if (arguments.length != 3) {
                 clazz = arguments[1];
                 options = {};
             }
-            options.autoConstruct = true;
+            options.implicitConstruct = true;
             return inherit(base, options, clazz);
         }
     }
