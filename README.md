@@ -69,17 +69,18 @@ Use it if no need for own properties check or other complex stuff, otherwise use
     
 In order to have protected scope any descendant of SomeClass can create an object and pass it as constructor parameter 'protected'. So only SomeClass and its descendants will have access to protected.someProtectedVariable.
 
-Class methods defined outside a constructor are also supported but they can't have access to private members and fields.
+Class methods defined outside a constructor using .prototype are also supported but they can't have access to private members and fields.
 
-    Someclass.prototype.someOtherMethod = function(param) { this.fieldOfClass = param + 5; }
+    SomeClass.prototype.someOtherMethod = function(param) { this.fieldOfClass = param + 5; }
 
-Also literal objects are supported by library. But they can't have private and protected fields and members. 
+Also literal objects are also supported by library. But they can't have private and protected fields and members.
 
     var OtherClass = {
         fieldOfClass: 0,
         methodOfClass = function () { return this.fieldOfClass + 5; }
     }
 
+As for me, I use literal objects if features they provide are enough, otherwise O prefer objects defined entirely inside a constructor function because they provide greatest encapsulation and OOP features.
 
 # Example 2. Using library to inherit class
 
@@ -113,16 +114,11 @@ Also literal objects are supported by library. But they can't have private and p
     console.log(obj.getPrivateVar()); //prints 102
     console.log(obj.getFieldOfParent()); //prints 12
 
-Explanation:
+Clazz.inherit is used to inherit Child from Parent.
 
-Clazz.inherit is used to inherit Child from Parent. Child redefines setPrivateVar to control value assigned to privateVar.
+Child overrides Parent's method setPrivateVar and inside this override calls method of Parent using this.superclass.setPrivateVar. So it has an access to a value set to private variable of Parent.
 
-Child overrides Parent's method setPrivateVar and inside override calls method of Parent using this.superclass. So it has an access a value of private variable of Parent.
-
-Child calls this.superConstructApply to call constructor of Parent. Its important that no fields of an object would be defined or set before constructor call. Its the natural order of inheriting from an object: defining parent's fields first and applying child's fields
-
-As Child passes to constructor its own list of arguments, this call can be replaced with option.implicitConstruct
-
+Child invokes constructor of Parent by calling this.superclass(...). As Child passes to constructor its own list of arguments, this call can be replaced with option.implicitConstruct
 
 
     var Child = Clazz.inherit(Parent, {implicitConstruct: true}, {
