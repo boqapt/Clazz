@@ -1,4 +1,4 @@
-//Inheritance utility class. Now supports just single inheritance
+//Inheritance utility class. Supports just single inheritance
 var Clazz = function () {
     function proxy(f, context) {
         return function () {
@@ -75,7 +75,7 @@ var Clazz = function () {
         var baseClasses = baseIsLiteralObj ? [] : base.prototype.__baseClasses || [];
         baseClasses.push(base);
 
-        //we need internal field __baseClasses just to not be obliged specifying base class name in 2 places (inherit
+        //we need internal field __baseClasses just not to be obliged specifying base class name in 2 places (inherit
         // call and constructor call).
         constructor.prototype = Clazz.extend(extendFunc(baseProto, constructor.prototype), {
             __baseClasses: baseClasses,
