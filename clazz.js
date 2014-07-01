@@ -99,16 +99,16 @@ var Clazz = function () {
         //
         //base (input parameter), clazz (input/output parameter): classes, whether function or literal object.
         //
-        //Prototype of clazz is modified (for inheriting) but only if clazz is a function and options.implicitConstruct is
-        //not specified.
-        //
         //- If one of base and clazz is function then returned class is function used for creation of
         // objects by 'new' operator.
-        // Created objects have method .superclass. It should be called to instantiate ancestor class.
-        // Assumption: caller doesn't modify properties of 'this' before .superclass call (needed for correct work of constructor)
-        // .superclass has variable number of arguments, all passed to ancestor's constructor
-        // After this call method .superclass turns into field .superclass of object type
-        // containing ancestor's methods (all own and inherited methods of ancestor). It's syntax like in Java language.
+        // Created objects have method .superclass. It should be called to instantiate ancestor class and has variable
+        // number of arguments, all passed to ancestor's constructor.
+        // Assumption: caller doesn't modify properties of 'this' before .superclass call (it is needed for correct work
+        // of constructor)
+        // After .superclass call method .superclass becomes field .superclass of object type containing ancestor's
+        // methods (all own and inherited methods of ancestor). This syntax is like in Java language.
+        // If clazz is function then its prototype is modified (for inheriting) but only if options.implicitConstruct is
+        // not specified.
         //
         //- If both base and clazz are literal objects result is literal object too (modified clazz object)
         // with superclass field equal to base
