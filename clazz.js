@@ -18,7 +18,7 @@ var Clazz = function () {
         return result;
     }
 
-    function superConstruct(extendFunc) {
+    function superConstructor(extendFunc) {
         return function () {
             if (this.__baseClasses) {
                 //remove base class from __baseClasses. make it equal to own chain of inheritance of base class
@@ -80,7 +80,7 @@ var Clazz = function () {
         constructor.prototype = Clazz.extend(extendFunc(baseProto, constructor.prototype), {
             __baseClasses: baseClasses,
             constructor: constructor,
-            superclass: superConstruct(extendFunc)
+            superclass: superConstructor(extendFunc)
         });
 
         return constructor;
@@ -105,7 +105,7 @@ var Clazz = function () {
         //- If one of base and clazz is function then returned class is function used for creation of
         // objects by 'new' operator.
         // Created objects have method .superclass. It should be called to instantiate ancestor class.
-        // Assumption (needed for correct work of constructor): caller don't modify properties of 'this' .superclass call
+        // Assumption: caller doesn't modify properties of 'this' before .superclass call (needed for correct work of constructor)
         // .superclass has variable number of arguments, all passed to ancestor's constructor
         // After this call method .superclass turns into field .superclass of object type
         // containing ancestor's methods (all own and inherited methods of ancestor). It's syntax like in Java language.
@@ -117,10 +117,10 @@ var Clazz = function () {
         //
         //- extendFunc - Used for merging objects. Specified if simple Clazz.extend isn't enough
         //
-        //- autoConstruct - If specified, constructor of base class is called automatically on creation of object.
+        //- autoConstruct - If specified, constructor of base class is called implicitly on creation of object.
         //
-        //Assumption: if not autoConstruct then constructor of clazz should call constructor of 'base' explicitly
-        //(if both constructors exist)
+        // Assumption: if not autoConstruct then constructor of clazz should call constructor of 'base' explicitly
+        // (if both constructors exist)
         inherit:function (base, options, clazz) {
             if (arguments.length != 3) {
                 clazz = arguments[1];

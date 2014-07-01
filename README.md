@@ -27,7 +27,7 @@ not specified.
 - If one of base and clazz is function then returned class is function used for creation of
 objects by 'new' operator.
 Created objects have method .superclass. It should be called to instantiate ancestor class.
-Assumption (needed for correct work of constructor): caller don't modify properties of 'this' .superclass call
+Assumption: caller doesn't modify properties of 'this' before .superclass call (needed for correct work of constructor)
 .superclass has variable number of arguments, all passed to ancestor's constructor
 After this call method .superclass turns into field .superclass of object type
 containing ancestor's methods (all own and inherited methods of ancestor). It's syntax like in Java language.
@@ -39,7 +39,7 @@ options - optional object, can be omitted. Fields:
 
 - extendFunc - Used for merging objects. Specified if simple Clazz.extend isn't enough
 
-- autoConstruct - If specified, constructor of base class is called automatically on creation of object.
+- autoConstruct - If specified, constructor of base class is called implicitly on creation of object.
 
 Assumption: if not autoConstruct then constructor of clazz should call constructor of 'base' explicitly
 (if both constructors exist)
@@ -141,7 +141,7 @@ There is a shortcut for this option. First line of the code above can be replace
     var Child = Clazz.inheritConstruct(Parent, { ...
 
 
-If we remove Child's private field anotherPrivateVar, we can make use literal object.
+If we remove Child's private field anotherPrivateVar, we can use literal object:
 
 
     var Child = Clazz.inherit(Parent, {
@@ -151,4 +151,4 @@ If we remove Child's private field anotherPrivateVar, we can make use literal ob
     });
 
 
-Though inherit is used here and not inheritConstruct, parent's constructor is anyway called if we use literal objects.
+Though inherit is used here and not inheritConstruct, parent's constructor is anyway called implicitly if we use literal objects.
