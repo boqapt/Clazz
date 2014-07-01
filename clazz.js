@@ -1,35 +1,49 @@
 //Inheritance utility class. Now supports just single inheritance
 var Clazz = function () {
-    function constructionMethods(extendFunc) {
-        return {
-            //we need __baseClasses, superConstruct, superConstructApply just to not be obliged specifying base class
-            // name in 2 places (inherit call and constructor call). We can still call base constructor directly with
-            // superConstructDirect
-            superConstructDirect:function (baseClass, args) {
-                //create private scope of parent class and connect it to constructed object
-                extendFunc(this, baseClass.apply(this, args));
-                this.superclass = extendFunc({}, this); //create parent fields table and save link to it
-            },
+    function proxy(f, context) {
+        return function () {
+            f.apply(context, arguments);
+        }
+    }
 
-            //Assumption: caller didn't modify 'this' (for example, setting fields) before call (needed for parent fields table)
-            //Has variable number of arguments, all passed to base constructor
-            superConstruct:function () {
+    //creates virtual methods table
+    function vtable(source, context) {
+        var result = {};
+        for (var key in source) {
+            var f = source[key];
+            if (typeof(f) === 'function') {
+                result[key] = proxy(f, context);
+            }
+        }
+        return result;
+    }
+
+    function superConstruct(extendFunc) {
+        return function () {
+            if (this.__baseClasses) {
                 //remove base class from __baseClasses. make it equal to own chain of inheritance of base class
                 var baseClass = this.__baseClasses.pop();
-                if (baseClass) {
-                    this.superConstructDirect(baseClass, arguments);
-                    this.__baseClasses.push(baseClass); //rollback __baseClasses
+                //create private scope of parent class and connect it to constructed object
+                var baseObject;
+                if (typeof(baseClass) === 'function') {
+                    extendFunc(this, baseClass.apply(this, arguments));
+                    baseObject = this;
+                } else {
+                    baseObject = baseClass;
                 }
-            },
-
-            superConstructApply:function (args) {
-                this.superConstruct.apply(this, args);
+                if (extendFunc !== Clazz.extend) {
+                    baseObject = extendFunc({}, baseObject);
+                }
+                //create parent fields table and save link to it
+                this.superclass = vtable(baseObject, this); //create parent fields table and save link to it
+                this.__baseClasses.push(baseClass); //rollback __baseClasses
             }
         }
     }
+
     function autoConstructor(clazz, extendFunc) {
         return function () {
-            this.superConstructApply(arguments);
+            this.superclass.apply(this, arguments);
             if (extendFunc) {
                 extendFunc(this, clazz);
             } else {
@@ -54,26 +68,20 @@ var Clazz = function () {
             constructor = options.autoConstruct ? autoConstructor(clazz) : clazz;
             constructor.prototype = clazz.prototype;
         }
+
         //prepare chain of inheritance and parent's prototype
-        var baseProto;
-        var baseClasses; //chain of base classes (for tracking currently constructed ancestor)
-        if (baseIsLiteralObj) {
-            baseClasses = [];
-            baseProto = base;
-        } else {
-            baseClasses = base.prototype.__baseClasses || [];
-            baseClasses.push(base);
-            baseProto = base.prototype;
-        }
-        baseProto = extendFunc({}, baseProto);
-        //prepare prototype of new class
-        constructor.prototype = extendFunc(baseProto, constructor.prototype);
-        if (baseIsLiteralObj) {
-            constructor.prototype.superclass = baseProto;
-        }
-        constructor.prototype.__baseClasses = baseClasses;
-        constructor.prototype.constructor = constructor;
-        Clazz.extend(constructor.prototype, constructionMethods(extendFunc));
+        var baseProto = extendFunc({}, baseIsLiteralObj ? base : base.prototype);
+        //chain of base classes (for tracking currently constructed ancestor)
+        var baseClasses = baseIsLiteralObj ? [] : base.prototype.__baseClasses || [];
+        baseClasses.push(base);
+
+        //we need internal field __baseClasses just to not be obliged specifying base class name in 2 places (inherit
+        // call and constructor call).
+        constructor.prototype = Clazz.extend(extendFunc(baseProto, constructor.prototype), {
+            __baseClasses: baseClasses,
+            constructor: constructor,
+            superclass: superConstruct(extendFunc)
+        });
 
         return constructor;
     }
@@ -96,11 +104,11 @@ var Clazz = function () {
         //
         //- If one of base and clazz is function then returned class is function used for creation of
         // objects by 'new' operator.
-        // Created objects have:
-        // -- field .superclass containing virtual table of fields for ancestor
-        // -- method superConstruct(arg1, arg2, ...) - call base constructor with given arguments
-        // -- method superConstructApply(args) - same as superConstruct, bug arguments are given as array
-        // -- method superConstructDirect(base, args) - call given base constructor with given array of arguments
+        // Created objects have method .superclass. It should be called to instantiate ancestor class.
+        // Assumption (needed for correct work of constructor): caller don't modify properties of 'this' .superclass call
+        // .superclass has variable number of arguments, all passed to ancestor's constructor
+        // After this call method .superclass turns into field .superclass of object type
+        // containing ancestor's methods (all own and inherited methods of ancestor). It's syntax like in Java language.
         //
         //- If both base and clazz are literal objects result is literal object too (modified clazz object)
         // with superclass field equal to base

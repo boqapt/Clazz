@@ -15,7 +15,7 @@ But this library has a goal to include only features natural for JS, use syntax 
 API
 ---
 
-    Clazz.inherit(base, clazz, extendFunc)
+    Clazz.inherit(base, options, clazz)
 
 creates and returns class having functionality of 'clazz' but inheriting from 'base'.
 
@@ -25,14 +25,12 @@ Prototype of clazz is modified (for inheriting) but only if clazz is a function 
 not specified.
 
 - If one of base and clazz is function then returned class is function used for creation of
-objects by 'new' operator. 
-- If one of base and clazz is function then returned class is function used for creation of
-objects by 'new' operator. 
-Created objects have: 
-  - field .superclass containing virtual table of fields for ancestor
-  - method superConstruct(arg1, arg2, ...) - call base constructor with given arguments
-  - method superConstructApply(args) - same as construct, bug arguments are given as array
-  - method superConstructDirect(base, args) - call given base constructor with given array of arguments
+objects by 'new' operator.
+Created objects have method .superclass. It should be called to instantiate ancestor class.
+Assumption (needed for correct work of constructor): caller don't modify properties of 'this' .superclass call
+.superclass has variable number of arguments, all passed to ancestor's constructor
+After this call method .superclass turns into field .superclass of object type
+containing ancestor's methods (all own and inherited methods of ancestor). It's syntax like in Java language.
 
 - If both base and clazz are literal objects result is literal object too (modified clazz object)
 with superclass field equal to base
@@ -44,13 +42,14 @@ options - optional object, can be omitted. Fields:
 - autoConstruct - If specified, constructor of base class is called automatically on creation of object.
 
 Assumption: if not autoConstruct then constructor of clazz should call constructor of 'base' explicitly
+(if both constructors exist)
 
     Clazz.inheritConstruct(base, options, clazz) 
 
 creates and returns class same as 'clazz' but inheriting from 'base'. constructor of base class is called
 automatically on creation of object.
 
-(Shortcut for .inherit method with autoConstruct option.)
+(Shortcut for .inherit method with autoConstruct option set)
 
     Clazz.extend(source, target)
 
@@ -99,7 +98,7 @@ Also literal objects are supported by library. But they can't have private and p
     };
 
     var Child = Clazz.inherit(Parent, function() {
-        this.superConstructApply(arguments);
+        this.superclass.apply(this, arguments);
         
         var anotherPrivateVar = 1;
         Clazz.extend(this,{
@@ -130,23 +129,16 @@ As Child passes to constructor its own list of arguments, this call can be repla
         var anotherPrivateVar = 1;
         Clazz.extend(this,{
             setPrivateVar: function(newPrivateVar){
-                this.superclass.setPrivateVar.call(this,newPrivateVar+anotherPrivateVar);
+                this.superclass.setPrivateVar(newPrivateVar+anotherPrivateVar);
             }
         })
     });
     
 
-There is a shortcut for this option. The following code does the same.
+There is a shortcut for this option. First line of the code above can be replaced with:
 
 
-    var Child = Clazz.inheritConstruct(Parent, {
-        var anotherPrivateVar = 1;
-        Clazz.extend(this,{
-            setPrivateVar: function(newPrivateVar){
-                this.superclass.setPrivateVar.call(this,newPrivateVar+anotherPrivateVar);
-            }
-        })
-    });
+    var Child = Clazz.inheritConstruct(Parent, { ...
 
 
 If we remove Child's private field anotherPrivateVar, we can make use literal object.
@@ -154,8 +146,8 @@ If we remove Child's private field anotherPrivateVar, we can make use literal ob
 
     var Child = Clazz.inherit(Parent, {
         setPrivateVar: function(newPrivateVar){
-                this.superclass.setPrivateVar.call(this,newPrivateVar+1);
-            }
+             this.superclass.setPrivateVar(newPrivateVar+1);
+        }
     });
 
 
